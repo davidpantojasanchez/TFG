@@ -24,6 +24,7 @@ void prepararHeuristica(Configuracion configuracion, PrecalculoHeuristica &preca
 Configuracion transformarEntradaTQBF(string input1, string input2, double& o, int& INF);
 Configuracion entradaEJE(string input1, string input2, string input3, string input4, string input5, double& o, int& INF);
 
+// Número de heurísticas y profundidad máxima que puede ser especificada. Cuando se ejecuta con profundidad ilimitada (valor de profundidad en el comando menor que 0), ese límite se ignora. Si se quiere especificar una profundidad máxima determinada mayor que este número, hay que modificarlo previamente.
 const int NumHeuristicas = 5;
 const int MaxProfundidad = 10;
 
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
     string argEstrategia = "n", argModo = "s", argHeuristicaElegida1 = "5", argHeuristicaElegida2 = "5", argProfundidad1 = "0", argProfundidad2 = "0", argPases = "2", argIn1, argIn2, argIn3, argIn4, argIn5, entrada, argEscalaEJE = "10", argEscalaTQBF = "10", argAnalizar = "0";   // valores por defecto
     string strEstrategia = "estrategia", strModo = "modo", strHeuristicaElegida = "heuristica", strProfundidad = "profundidad", strPases = "pases", strEje = "eje", strTqbf = "tqbf", strTest = "testing", strMaxProfundidad = "maxprofundidad", strEscala = "escala", strAnalizar = "analizar";
     PrecalculoHeuristica precalculo;
+    // Leer el comando de los argumentos del programa
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {
             string arg = argv[i];
@@ -120,6 +122,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Leer el comando desde la consola
     else {
         cout << "Escribe \"y\" para analizar unicamente acciones que siguen la estrategia o \"n\" para tener en cuenta todas" << endl;
         cout << "* Estrategia: ";
@@ -195,6 +198,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+// genera instancias de EJE y TQBF usando entradas.cpp y las ejecuta de la forma especificada (testing por enfrentamientos o testing por comparación con la solución óptima), guardando información útil para comparar los parámetros del algoritmo en out.cpp.
 void testing(int nEJE, int nTQBF, int profundidad, double escalaEJE, double escalaTQBF, int analizar, int pasesLimite, string modo, double& o, int& INF) {
     bool seguirEstrategia;
     int heuristicaElegida1;
@@ -563,6 +567,7 @@ void testing(int nEJE, int nTQBF, int profundidad, double escalaEJE, double esca
     latex.close();
 }
 
+// Con el modo manual, el usuario especifica por la consola las acciones de ambos jugadores.
 void manual(Configuracion i, int pasesLimite, double o) {
     bool ganador;
     list<string> valoracion;
@@ -612,6 +617,7 @@ void manual(Configuracion i, int pasesLimite, double o) {
     }
 }
 
+// El modo alterno se utiliza para que un usuario juegue a través de la consola contra la máquina.
 void alterno(Configuracion i, bool seguirEstrategia, int profundidad1, int profundidad2, int pasesLimite, int heuristicaElegida1, int heuristicaElegida2, PrecalculoHeuristica precalculo, double o, int INF) {
     bool ganador;
     list<string> valoracion;
@@ -666,6 +672,7 @@ void alterno(Configuracion i, bool seguirEstrategia, int profundidad1, int profu
     }
 }
 
+// El modo simulación se ejecuta sin requerir intervención del usuario y escribe en el fichero out.txt el resultado (y las acciones que han llevado a él) del problema suponiendo que ambos jugadores siguen una estrategia óptima, o, si esto fuera demasiado costoso, una estrategia subóptima aceptable utilizando una heurística.
 void simulacion(Configuracion i, bool seguirEstrategia, int profundidad1, int profundidad2, int pasesLimite, int heuristicaElegida1, int heuristicaElegida2, PrecalculoHeuristica precalculo, double o, int INF) {
     bool ganador;
     list<string> valoracion;
@@ -705,6 +712,7 @@ void simulacion(Configuracion i, bool seguirEstrategia, int profundidad1, int pr
     file.close();
 }
 
+// ejecución de una instancia, llamado durante testing. parecido a simulacion()
 bool test(Configuracion i, bool seguirEstrategia, int profundidad1, int profundidad2, int pasesLimite, int heuristicaElegida1, int heuristicaElegida2, PrecalculoHeuristica precalculo, unsigned& clk1, unsigned& clk2, double o, int INF) {
     bool ganador;
     unsigned t0, t1;
@@ -723,6 +731,7 @@ bool test(Configuracion i, bool seguirEstrategia, int profundidad1, int profundi
     return ganador;
 }
 
+// Algoritmo minimax con poda alfa-beta
 Accion juega(Configuracion configuracion, bool seguirEstrategia, int profundidad1, int profundidad2, int pasesLimite, int heuristicaElegida1, int heuristicaElegida2, PrecalculoHeuristica precalculo, double o, int INF) {
     bool j = configuracion.j();
     Accion mejorA = Accion();
@@ -738,26 +747,6 @@ Accion juega(Configuracion configuracion, bool seguirEstrategia, int profundidad
 
     return mejorA;
 }
-
-/*
-double valoraMinMax(Configuracion configuracion, int n, double alfa, double beta, bool seguirEstrategia, int pasesLimite, int heuristicaElegida, PrecalculoHeuristica precalculo) {
-    bool j = configuracion.j(), ganador;    // si j, min
-    if (configuracion.terminal(ganador, o, pasesLimite))
-        return (ganador ? INF : -INF);
-    else if (n == 0)
-        return heuristica(configuracion, heuristicaElegida, precalculo);
-
-    for (Accion a : configuracion.accionesDesde(seguirEstrategia)) {
-        if (j)
-            beta = min(valoraMinMax(Configuracion(configuracion, a), n-1, alfa, beta, seguirEstrategia, pasesLimite, heuristicaElegida, precalculo), beta);
-        else
-            alfa = max(valoraMinMax(Configuracion(configuracion, a), n-1, alfa, beta, seguirEstrategia, pasesLimite, heuristicaElegida, precalculo), alfa);
-        if (alfa >= beta) break;
-    }
-
-    return (j ? beta : alfa);
-}
-*/
 
 double valoraMin(Configuracion configuracion, int n, double alfa, double beta, bool seguirEstrategia, int pasesLimite, int heuristicaElegida, PrecalculoHeuristica precalculo, double o, int INF) {
     bool ganador;
@@ -798,6 +787,7 @@ int sumatorio(int start, int end) {
     return r;
 }
 
+// Genera el nodo raíz a partir de una instancia de EJE o TQBF
 Configuracion generarRaiz(bool tqbf, string input1, string input2, string input3, string input4, string input5, PrecalculoHeuristica &precalculo, double& o, int& INF) {
     if (tqbf) {
         Configuracion r = transformarEntradaTQBF(input1, input2, o, INF);
@@ -811,6 +801,7 @@ Configuracion generarRaiz(bool tqbf, string input1, string input2, string input3
     }
 }
 
+// Calcula al principio de la ejecución algunos datos que se utilizarán para calcular la heurística de las configuraciones.
 void prepararHeuristica(Configuracion configuracion, PrecalculoHeuristica &precalculo, double o) {
     for (auto [key, value] : configuracion.getT()) {
         precalculo.addGMax(max(value.getG(), o));
@@ -824,6 +815,7 @@ void prepararHeuristica(Configuracion configuracion, PrecalculoHeuristica &preca
     }
 }
 
+// Genera el nodo raíz a partir de una instancia de TQBF
 Configuracion transformarEntradaTQBF(string input1, string input2, double& o, int& INF) {
     unordered_map<string, string> varToId;
     unordered_map<string, Terreno> T = unordered_map<string, Terreno>();
@@ -1033,6 +1025,7 @@ Configuracion transformarEntradaTQBF(string input1, string input2, double& o, in
     return Configuracion(T, M, dini1, dini2);
 }
 
+// Genera el nodo raíz a partir de una instancia de EJE
 Configuracion entradaEJE(string input1, string input2, string input3, string input4, string input5, double& o, int& INF) {
     unordered_map<string, Terreno> T;
     list<Relacion> M = list<Relacion>();

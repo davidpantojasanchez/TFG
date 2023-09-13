@@ -30,6 +30,7 @@ public:
 
     Relacion(double g, list<string> ID) : g(g), ID(ID) {}
 
+    // Devuelve si la compra de un terreno ("nuevoId") completa la relación. Comprueba si el jugador ha comprado todos los terrenos en la relación y si ésta contiene el terreno nuevo (para no sumar el valor de ganancia varias veces)
     bool completa(unordered_map<string, Terreno> E, string nuevoId) {
         bool tieneNuevoId = false;
         for (string id : ID) {
@@ -61,6 +62,7 @@ public:
         return ID;
     }
 
+    // Crea una acción a partir de una lista de terrenos que el jugador quiere comprar
     Accion(list<string> ID) : ID(ID) {
         s = "";
         for (string id : ID) {
@@ -68,6 +70,7 @@ public:
         }
     }
 
+    // Devuelve una cadena que representa la acción
     string str() {
         return s;
     }
@@ -78,6 +81,7 @@ private:
 
 };
 
+// Creado al principio de la ejecución de una instancia. Usado para calcular la heurística.
 class PrecalculoHeuristica {
 public:
     int getGMax() { return gananciaMaxima; }
@@ -114,6 +118,8 @@ public:
         return M;
     }
 
+
+    // Calcula las acciones que se pueden realizar desde la configuración. si seguirEstrategia es true, se devuelven únicamente las acciones que entran dentro de la estrategia
     list<Accion> accionesDesde(bool seguirEstrategia) {
         if (seguirEstrategia)
             return estrategia();
@@ -132,6 +138,7 @@ public:
         return acciones;
     }
 
+    // Devuelve una cadena que representa la configuración
     string str() {
         string r = "";
         r += "CONFIGURACION: \n";
@@ -157,10 +164,14 @@ public:
         return r;
     }
 
+
+    // Devuelve true si el jugador que tiene que realizar un movimiento desde la configuración es J1 y false si es J2
     bool j() {
         return (t % 2 == 1);
     }
 
+
+    // Devuelve true si la configuración es terminal e indica en "ganador" qué jugador ha ganado la partida
     bool terminal(bool& ganador, double o, int pasesLimite) {
         if (pases2 >= pasesLimite || g1 >= o) {
             ganador = true;
@@ -173,6 +184,7 @@ public:
         return false;
     }
 
+    // Devuelve la valoración de la configuración, siguiendo la heurística especificada. Requiere el valor de ganancia objetivo (o) y algunos datos sobre la instancia que se han calculado al comienzo de la partida (precalculo)
     double heuristica(int heuristicaElegida, PrecalculoHeuristica precalculo, double o) {
         double h = 0, h2 = 0;
         switch (heuristicaElegida) {   // estas heuristicaElegidas consideran:
@@ -213,6 +225,7 @@ public:
         return h;
     }
 
+    // Crea la configuración siguiente desde la configuración cuando se utiliza la acción indicada
     Configuracion(Configuracion configuracion, Accion accion) {
 
         d1 = configuracion.d1, d2 = configuracion.d2;
@@ -262,6 +275,7 @@ public:
         i = &configuracion;
     }
     
+    // Crea una configuración a partir de unos valores iniciales. Se utiliza para generar el nodo raíz del árbol.
     Configuracion(unordered_map<string, Terreno> terrenos, list<Relacion> relaciones, double dini1, double dini2) {
         t = 1;
         d1 = dini1, d2 = dini2;
@@ -294,6 +308,7 @@ private:
         return c;
     }
 
+    // Calcula la ganancia que se obtendrá por haber completado relaciones con la compra de un terreno especificado por "nuevoId"
     double gAdicionalNueva(unordered_map<string, Terreno> E, string nuevoId) {
         double g = 0;
         for (Relacion r : M) {
@@ -304,6 +319,8 @@ private:
         return g;
     }
 
+
+    // Función auxiliar usada para calcular las acciones desde la configuración sin tener que seguir la estrategia
     void accionesAux(list<list<string>> &lista, list<string> padre, double d, unordered_map<string,bool> visto) {
         for (auto [key, value] : T) {
             if (!visto[key] && value.getC() <= d) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
@@ -316,6 +333,7 @@ private:
         }
     }
 
+    // Calcula las acciones desde la configuración siguiendo la estrategia
     list<Accion> estrategia() {
         list<Accion> acciones = list<Accion>();
         int k = T.size() + E1.size() + E2.size() - 2;   // 4 + 3*nvar

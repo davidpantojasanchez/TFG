@@ -23,6 +23,7 @@ const double FactorNumConjMax = 0.9;
 const double FactorNumRelacionesMin = 0.5;
 const double FactorNumConjMin = 0.5;
 
+// Genera en "entradas.txt" nEJE instancias de EJE y nTQBF instancias de TQBF de la escala indicada por escalaEJE y escalaTQBF para las instancias de EJE y TQBF, respectivamente. El valor de escala será multiplicado por varias constantes para calcular el número de relaciones, etc de las instancias.
 void entradas(int nEJE, int nTQBF, int escalaEJE, int escalaTQBF) {
     ofstream file;
     file.open("entradas.txt");
@@ -45,6 +46,7 @@ string x(int varIndex) {
 
 // EJE
 
+// Genera una instancia de EJE con NumTerrenos terrenos y NumRelaciones relaciones
 string eje(int NumTerrenos, int NumRelaciones) {
     int MaxValor = NumTerrenos*2;
     int o = NumTerrenos*MaxValor*0.12 + rand() % int(NumTerrenos*MaxValor*0.06) + 1;
@@ -109,6 +111,7 @@ vector<int> numerosAleatorios(int n, int min, int max) {
 
 // TQBF
 
+// Genera una instancia de TQBF con NumVars variables y NumConj conjunciones
 string tqbf(int NumVars, int NumConj) {
     string r = "tqbf:";
     for (int i = 0; i <= NumVars; i++) {
