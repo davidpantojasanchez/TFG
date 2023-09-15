@@ -281,7 +281,7 @@ void testing(int nEJE, int nTQBF, int profundidad, double escalaEJE, double esca
                             victorias[entrada == "eje" ? 0 : 1][resultado ? p1 : p2][resultado ? h1 : h2] += 1;
                             victoriasContra[entrada == "eje" ? 0 : 1][resultado ? h1 : h2][resultado ? h2 : h1] += 1;
 
-                            progreso += double(k1+k2)/progresoTotal1 + 1;
+                            progreso += double(k1+k2)/progresoTotal1;
                             if (fabs(progreso - ultimoProgreso) >= 0.01) {
                                 ultimoProgreso = progreso;
                                 system("cls");
